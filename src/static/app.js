@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  const participantsList = document.getElementById("participants-list");
 
   // Function to fetch activities from API
   async function fetchActivities() {
@@ -25,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <p><strong>Participants:</strong> ${details.participants.join(", ") || "None"}</p>
         `;
 
         activitiesList.appendChild(activityCard);
@@ -34,10 +36,31 @@ document.addEventListener("DOMContentLoaded", () => {
         option.value = name;
         option.textContent = name;
         activitySelect.appendChild(option);
+
+        activityCard.addEventListener("click", () => {
+          displayParticipants(details.participants);
+        });
       });
     } catch (error) {
       activitiesList.innerHTML = "<p>Failed to load activities. Please try again later.</p>";
       console.error("Error fetching activities:", error);
+    }
+  }
+
+  // Function to display participants
+  function displayParticipants(participants) {
+    participantsList.innerHTML = "";
+
+    if (participants.length === 0) {
+      participantsList.innerHTML = "<p>No participants signed up yet.</p>";
+    } else {
+      const ul = document.createElement("ul");
+      participants.forEach((participant) => {
+        const li = document.createElement("li");
+        li.textContent = participant;
+        ul.appendChild(li);
+      });
+      participantsList.appendChild(ul);
     }
   }
 
@@ -62,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        fetchActivities(); // Refresh activities list
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
